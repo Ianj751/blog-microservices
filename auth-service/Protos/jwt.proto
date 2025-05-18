@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option csharp_namespace = "AuthService.Protos";
+
+package jwk;
+/* 
+    The purpose of this grpc service is to allow microservices to request a public key 
+    based on the Kid to verify a jwt passed to them
+*/
+// The greeting service definition.
+service KeyService{
+  // Sends a greeting
+  rpc GetPublicKey (PublicKeyRequest) returns (PublicKeyResponse);
+}
+
+// The request message containing the user's name.
+message PublicKeyRequest {
+  string kid = 1;
+}
+
+// The response message containing the greetings.
+message PublicKeyResponse {
+  string key = 1;
+}

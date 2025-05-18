@@ -1,5 +1,6 @@
 
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using AuthService.Models;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -7,15 +8,28 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AuthService.Services;
 
-public class TokenProvider(IConfiguration configuration)
+public class TokenProvider
 {
+
+    private readonly IConfiguration _configuration;
+    private readonly IKeyStore _keyStore;
+
+    public TokenProvider(IConfiguration configuration, IKeyStore keyStore)
+    {
+        this._configuration = configuration;
+        this._keyStore = keyStore;
+    }
 
     public string Create(ApplicationUser user)
     {
-        string secretKey = configuration["Jwt:Secret"]!;
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
-        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+        var rsaProvider = new RSACryptoServiceProvider(512);
+        var securityKey = new RsaSecurityKey(rsaProvider);
+
+
+        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256Signature);
+        var guid = new Guid().ToString();
+        _keyStore.AddKey(guid, Encoding.UTF8.GetString(securityKey.Rsa.ExportRSAPublicKey()));
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -26,10 +40,15 @@ public class TokenProvider(IConfiguration configuration)
                     //Gotta add some more claims here
                 ]
             ),
-            Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
+            Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
             SigningCredentials = creds,
-            Issuer = configuration["Jwt:Issuer"],
-            Audience = configuration["Jwt:Audience"]
+            Issuer = _configuration["Jwt:Issuer"],
+            Audience = _configuration["Jwt:Audience"],
+            AdditionalHeaderClaims = new Dictionary<string, object>{
+                { "kid", guid}
+
+            }
+
         };
 
         var handler = new JsonWebTokenHandler();
@@ -37,4 +56,5 @@ public class TokenProvider(IConfiguration configuration)
 
         return token;
     }
+
 }

@@ -1,0 +1,2 @@
+obj\Debug\net9.0\Protos/Jwt.cs \
+obj\Debug\net9.0\Protos/JwtGrpc.cs: Protos/jwt.proto
