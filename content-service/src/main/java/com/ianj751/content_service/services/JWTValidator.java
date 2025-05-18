@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.ianj751.content_service.protos.PublicKeyResponse;
@@ -14,10 +15,14 @@ import io.jsonwebtoken.Jwts;
 
 import lombok.RequiredArgsConstructor;
 
+@Service
 @RequiredArgsConstructor
 public class JWTValidator {
 
     private final PublicKeyService pKeyService;
+  /*  public JWTValidator(PublicKeyService pKeyService) {
+        this.pKeyService = pKeyService;
+    } */
    
     public boolean Validate(String token){
         String[] chunks = token.split("\\.");
