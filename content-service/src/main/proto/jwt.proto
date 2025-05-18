@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package jwt;
+
+option java_multiple_files=true;
+option java_package = "com.ianj751.content_service.protos";
+option java_outer_classname = "ContentServiceProtos";
+
+service KeyService{
+  // Sends a greeting
+  rpc GetPublicKey (PublicKeyRequest) returns (PublicKeyResponse);
+}
+
+// The request message containing the user's name.
+message PublicKeyRequest {
+  string kid = 1;
+}
+
+// The response message containing the greetings.
+message PublicKeyResponse {
+  string key = 1;
+}
